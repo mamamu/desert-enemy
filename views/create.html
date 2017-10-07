@@ -1,0 +1,32 @@
+<html>
+  <head>
+  <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <header>
+      <a href="/login">Log In</a>|<a href="/">Home</a>
+      <h1>Create a New Poll</h1>
+      <h2></h2>
+    </header>
+
+    <main>
+      <form id="pollname" >
+        <input id="name" type="text" maxlength="100" placeholder="Create a Name">
+        <button type="submit">Add Options</button>
+      </form>
+      <form id="options" class="hidden">
+        <input type="text" class="option" maxlength="100" placeholder="Add an Option">
+        <input type="text" class="option" maxlength="100" placeholder="Add an Option">
+        <input type="text" class="option" maxlength="100" placeholder="Add an Option">
+        <input type="text" class="option" maxlength="100" placeholder="Add an Option">
+        <button id="submit" type="submit">Submit</button>
+      </form>
+    </main>
+    
+    
+  </body>
+  <script src="https://code.jquery.com/jquery-2.2.1.min.js"
+            integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
+            crossorigin="anonymous"></script>
+    <script src="/create.js"></script>
+</html>    
