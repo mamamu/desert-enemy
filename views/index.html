@@ -21,7 +21,7 @@
   </head>
   <body>
     <header>
-      <a id="auth" href="/login">Log In</a>|<a href="/create">Create a Poll</a>
+      <a id="logoff" class="hidden" href="/logoff">Log Off</a><a id="login" href="/login">Log In</a>|<a href="/create">Create a Poll</a>
       <h1>
         Polls
         <p id="temp">
@@ -32,7 +32,7 @@
 
     <main>
       <p class="bold">Click a Poll Name to see more information,</p>
-      <p></p>
+      <p class="right"><canvas id="myChart" class="hidden"></canvas></p>
       <!--form>
         <input type="text" maxlength="100" placeholder="Dreams!">
         <button type="submit">Submit</button>
@@ -50,9 +50,16 @@
     </footer>
 
    <!-- Your web-app is https, so your scripts need to be too -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
     <script src="https://code.jquery.com/jquery-2.2.1.min.js"
             integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
             crossorigin="anonymous"></script>
+    
     <script src="/client.js"></script>
+    <script src="/user_controller.js"></script>
+    
+    
+   
+    
   </body>
 </html>

@@ -8,6 +8,33 @@ var url="mongodb://"+process.env.USER+":"+process.env.PASS+"@"+process.env.HOST+
 
 var options={useMongoClient:true}
 
+mongoose.connect(url, options);
+var db=mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+var optionSchema = Schema({option_id: Schema.Types.ObjectId,
+                          option: String,
+                          in_poll: { type: Schema.Types.ObjectId, ref: 'Poll' },
+                          user:{type:Schema.Types.ObjectId, ref:'User'}},  { timestamps: { createdAt: 'created_at' }});
+var pollSchema = Schema({poll_id: Schema.Types.ObjectId,
+                          poll_name:String,
+                         user: {type:Schema.Types.ObjectId, ref:'User'}},{ timestamps: { createdAt: 'created_at' }  
+                         
+});
+var userSchema = Schema({user_id: Schema.Types.ObjectId,
+                         profile_id: Number,
+                        username: String,
+                        provider: String});
+
+var voteSchema = Schema({
+                        poll: {type: Schema.Types.ObjectId, ref: 'Poll'},
+                        option:{type: Schema.Types.ObjectId, ref: 'Option'},
+                        user:{type: Schema.Types.ObjectId, ref:'User'},},{ timestamps: { createdAt: 'created_at' }});
+
+var Poll_Option = mongoose.model("Option", optionSchema);
+var Poll = mongoose.model("Poll", pollSchema);
+var User = mongoose.model("User", userSchema);
+var Vote = mongoose.model("Vote", voteSchema);
+
 var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
 var GithubStrategy = require('passport-github').Strategy;
@@ -19,7 +46,33 @@ passport.use(new GoogleStrategy({
   scope: 'https://www.googleapis.com/auth/plus.login'
 },
 function(token, tokenSecret, profile, cb) {
-  return cb(null, profile);
+  //console.log(profile);
+  process.nextTick(function () {
+    User.findOne({ 'profile_id': profile.id }, function(err, user){
+      if (err){
+        return cb(err);
+      }
+      if (user) {
+        return cb(null, user);
+      } else {
+        var newUser = new User();
+          newUser.user_id = new mongoose.Types.ObjectId(),
+        	newUser.profile_id = profile.id;
+					newUser.username = profile.displayName;
+					newUser.provider = profile.provider;
+					
+
+					newUser.save(function (err) {
+						if (err) {
+							throw err;
+						}
+            return cb(null, newUser);
+        
+      });
+    }
+  });
+  //return cb(null, profile);
+});
 }));
 
 passport.use(new GithubStrategy({
@@ -28,7 +81,33 @@ passport.use(new GithubStrategy({
   callbackURL: 'https://'+process.env.PROJECT_DOMAIN+'.glitch.me/login/github/return',  
 },
 function(token, tokenSecret, profile, cb) {
-  return cb(null, profile);
+  
+  process.nextTick(function () {
+    User.findOne({ 'profile_id': profile.id }, function(err, user){
+      if (err){
+        return cb(err);
+      }
+      if (user) {
+        return cb(null, user);
+      } else {
+        var newUser = new User();
+          newUser.user_id = new mongoose.Types.ObjectId(),
+        	newUser.profile_id = profile.id;
+					newUser.username = profile.username;
+					newUser.provider = profile.provider;
+					
+
+					newUser.save(function (err) {
+						if (err) {
+							throw err;
+						}
+            return cb(null, newUser);
+        
+      });
+    }
+  });
+  //return cb(null, profile);
+});
 }));
 
 passport.serializeUser(function(user, done) {
@@ -38,34 +117,13 @@ passport.deserializeUser(function(obj, done) {
   done(null, obj);
 });
 
+
+
 var express = require('express');
 var app = express();
 var expressSession = require('express-session');
 
 
-mongoose.connect(url, options);
-var db=mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-var optionSchema = Schema({option_id: Schema.Types.ObjectId,
-                          option: String,
-                          in_poll: { type: Schema.Types.ObjectId, ref: 'Poll' },
-                          user:Number},  { timestamps: { createdAt: 'created_at' }});
-var pollSchema = Schema({poll_id: Schema.Types.ObjectId,
-                          poll_name:String,
-                         user: Number},{ timestamps: { createdAt: 'created_at' }
-  
-                         //created_by: { type: Schema.Types.ObjectId, ref: 'User' }
-});
-var userSchema = Schema({user_id: Number,
-                        username: String});
-//newly added vote schema  also need to correct user 
-var voteSchema = Schema({poll:{ type: Schema.Types.ObjectId, ref: 'Poll' },
-                        option:{type: Schema.Types.ObjectId, ref: 'Option'},
-                        user:Number},{ timestamps: { createdAt: 'created_at' }});
-
-var poll_option = mongoose.model("Option", optionSchema);
-var poll = mongoose.model("Poll", pollSchema);
-var user = mongoose.model("User", userSchema);
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 
@@ -79,68 +137,56 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
-app.get("/", function (request, response) {
-  response.sendFile(__dirname + '/views/index.html');
+app.get("/", function (req, res) {   
+  res.sendFile(__dirname + '/views/index.html');
 });
 
-app.get("/create", requireLogin, function (request, response) {
-  response.sendFile(__dirname + '/views/create.html');
+app.get("/create", requireLogin, function (req, res) {
+  res.sendFile(__dirname + '/views/create.html');
 });
 
-app.get("/login", function (request, response) {
-  response.sendFile(__dirname + '/views/login.html');
+app.get("/login", function (req, res) {
+  res.sendFile(__dirname + '/views/login.html');
 });
 
 app.get('/logoff',
-  function(req, res) {
-  if(req.cookies['google-passport-example']){
-    res.clearCookie('google-passport-example');
-    res.redirect('/');
-     }
-  else if (req.cookies['github-passport-example']) {
-    res.clearCookie('github-passport-example');
-    res.redirect('/');
-  }  
-    
+  function(req, res) {  
+  req.logOut();   
+  res.redirect('/'); 
     
   }
 );
+
+//this creates the new poll name
 app.post("/create/new/:pollname",  
-         function (req, res) {
-  //console.log(req);
-  var currentPoll= new poll( {poll_id: new mongoose.Types.ObjectId(),
+         function (req, res) {  
+  var currentPoll= new Poll( {poll_id: new mongoose.Types.ObjectId(),
                               poll_name:req.params.pollname,
-                              user: 1
+                              user :req.user._id
                               });
-  currentPoll.save(function(err)  { 
-    if (err) console.log(err);
-  })
+  currentPoll.save(function(err) { 
+    if (err) console.err(err);
+  })  
 })
   
-
-app.post("/create/name/:pollname/:option", function (req, res){   
-  //console.log(req.user.id);
-  var query=poll.findOne({poll_name:req.params.pollname}, function(err, poll_id){
-    if (err) console.log(err);    
-    var currentOption=new poll_option({
+//this adds options to a created poll name
+app.post("/create/name/:pollname/:option", function (req, res){     
+  var query=Poll.findOne({poll_name:req.params.pollname}, function(err, poll_id){
+    if (err) console.err(err);    
+    var currentOption=new Poll_Option({
                                   option:req.params.option,
                                   in_poll:poll_id, 
-                                  user:1});
+                                  user:req.user._id});
     currentOption.save(function(err) {   
       if (err) console.log(err);
-      console.log("save");
-      
-      
-    });
-    
-  
-    });  
-//res.redirect('/create');
+      console.log("save"); 
+      });
+    });    
   res.sendStatus(200);
 });
 
 app.get("/polls", function (request, response) {   
-  var promise=poll.find().  
+  var promise=Poll.find().  
   sort('-created_at').
   limit(20).
   execAsync();
@@ -157,38 +203,94 @@ app.get("/polls", function (request, response) {
   })  
 });
 
-app.get("/polls/select/:id", function (request, response){ 
-  var id=request.params.id
-  console.log(id);
-  poll_option.find({in_poll:id}, function(err, options){
-    if (err) console.log(err);     
+app.get("/polls/display/:id", function (request, response){   
+  var id=request.params.id;  
+  var optObjArray=[];  
+  //get the list of poll options by poll id from the options collection loop through and get name and id and add these to obj
+  var Promise=Poll_Option.find({in_poll:id}).populate({path:"in_poll", select:"poll_name"}).exec();  
+  Promise.then(function (options){ 
+    var pollname=options[0].in_poll.poll_name;
+    options.forEach(function(opt){
+      var obj={};
+      obj.option=opt.option;
+      var oid=opt._id;
+      obj.id=opt._id;   
+      //get the count of votes from the vote table using the option id then add these to obj
+      var Promise=Vote.count({option:oid}).exec();
+      Promise.then(function (ct){
+        obj.ct=ct    
+        //when obj complete push to votesArray, then process optObjArray to get separate labels and votes arrays in the correct order
+        optObjArray.push(obj);     
+        var ret={};
+        var labels=[];
+        var votes=[];        
+        optObjArray.forEach(function(item){        
+          labels.push(item.option);
+          votes.push(item.ct);        
+        });   
+        ret.votes=votes;
+        ret.labels=labels;
+        if (labels.length<options.length){
+          console.log(labels.length);
+        }else {  
+          ret.poll_name=pollname
+          response.send(ret);
+        }
+      }).catch(function(err){
+            console.error(err);
+          });
+    });    
+  }).catch(function(err){
+        console.error(err);
+      });
+});
+
+app.get("/polls/select/:id", function (request, response){   
+  var id=request.params.id;   
+  Poll_Option.find({in_poll:id}, function(err, options){
+    if (err) console.err(err); 
     var opts=[];
-         for (var j=0; j<options.length; j++){ 
-           console.log(options[j].user);
-           opts.push({_id:options[j]._id, option:options[j].option});                      
-         }
-    response.send(opts);
-  }); 
- 
+    for (var j=0; j<options.length; j++){ 
+      opts.push({_id:options[j]._id, option:options[j].option}); 
+    }    
+    response.send(opts);    
+  });  
 });
 
+//vote for an option  need to change so it doesn't require login, but collects ip for anon votes.
+//also need to check if user/ip has voted  
+app.post('/polls/vote/:opt_id', function(req, res){  
+  
+  //if user then user = req. user id  else user = headers/xfowd trim at ,
+  //dont need a require user function, but could use check if voted in same place.
+  Poll_Option.findOne({_id:req.params.opt_id}, function(err, option){
+    
+    if (err) console.err(err);    
+    var current=option.in_poll;    
+    var newVote = new Vote ({  
+        poll: current,
+        option: req.params.opt_id,
+        user: req.user._id,
+  })
+    
+    newVote.save(function(err){
+      if(err)console.log(err);
+      console.log("voting");
+    })
+    
+  })
+  
+  
+  
+})
 
-/*
-// could also use the POST body instead of query string: http://expressjs.com/en/api.html#req.body
-app.post("/dreams", function (request, response) { 
-  var currentDream= new dream( {dream:request.query.dream, upvotes:0, user:1} );
-  currentDream.saveAsync().then(currentDream=>  {          
-      console.log('saving');    
-    });  
-  err=> {console.err(err)} 
-  response.sendStatus(200);
-});
-*/
+
+//auth routes for passport
 app.get('/auth/google', passport.authenticate('google'));
 
 app.get('/login/google/return', 
   passport.authenticate('google', 
-    { successRedirect: '/setcookie', failureRedirect: '/' }
+    { successRedirect: '/', failureRedirect: '/login' }
   )
 );
 
@@ -197,97 +299,48 @@ app.get('/auth/github', passport.authenticate('github'));
 
 app.get('/login/github/return', 
   passport.authenticate('github', 
-    { successRedirect: '/setcookie', failureRedirect: '/' }                      
+    { successRedirect: '/', failureRedirect: '/login' }                      
   )
        
 );
 
-// on successful auth, a cookie is set before redirecting
-// to the success view
-app.get('/setcookie', requireUser,
-  function(req, res) {
-  //console.log(req.get('Referrer'));
-    if(req.get('Referrer') && req.get('Referrer').indexOf("google")!=-1){
-      res.cookie('google-passport-example', new Date());
-      res.redirect('/create');
-    } else if(req.get('Referrer') && req.get('Referrer').indexOf("github")!=-1){
-      res.cookie('github-passport-example', new Date());
-      res.redirect('/create');
-    }
-  //what if you're already logged in from somewhere else?  
-  //need the below because referrer check doesn't work
-  else if (req.user.id && req.user.provider == "google"){
-    //console.log(req.user);
-      res.cookie('google-passport-example', new Date());
-      res.redirect('/create');
-    }else if (req.user.id && req.user.provider == "github"){
-      console.log(req.user.username);
-      res.cookie('github-passport-example', new Date());
-      res.redirect('/create');
-    }
-  else{      
-       res.redirect('/');
-    }
+app.get('/authRoute', requireLogin, function(req, res){  
+  //check that this rejects ip only voters
+  console.log("hi i see you're using  "+req.user.provider);
+  if (req.user._id){
+				res.json(req.user);
+			}
+  else {    
+    res.redirect('/login')
   }
-);
-/*
-app.get('/authRoute', requireLogin, function(req, res){
-  console.log("authRoute");
-  console.log(req);
-  if (req.user.github.id){
-				res.json(req.user.github);	
-			}
-			else if (req.user.google.id){
-				res.json(req.user.google);
-			}
 })
-*/
-// if cookie exists, success (different routes for each cookie too!). otherwise, user is redirected to index
-/*app.get('/success', requireLogin,
-  function(req, res) {
-    if(req.cookies['google-passport-example']) {
-      res.sendFile(__dirname + '/views/success.html');
-    } 
-    else if  (req.cookies['github-passport-example']) {
-      res.sendFile(__dirname + '/views/success2.html');
-    } 
-    else{
-      res.redirect('/');
-    }
-  }
-);
-*/
+
 
 function requireLogin(req, res, next){
-  if (req.isAuthenticated()){
+  if (req.isAuthenticated()){    
     return next();
   }
   else{
+    console.log("No user");
+    //console.log(req);
     res.redirect('/login');
   }
 }
-/*
-function requireLogin (req, res, next) {
-  if (!req.cookies['google-passport-example']){
-    console.log("not google")
-    if (!req.cookies['github-passport-example']) {
-      console.log("not github")
-      res.redirect('/');
-    } 
-    else {
-      next();
-    }
-  }else {
-    next();
-  }
-};
-*/
+
 
 function requireUser (req, res, next) {
-  if (!req.user) {    
-    res.redirect('/');
+  if (!req.user) {  
+    ///create user here and add to database
+    //console.log(req.headers['x-forwarded-for']);
+    var head=req.headers['x-forwarded-for']  
+    var newUserIp; 
+    newUserIp=head.slice(0,11);
+  
+    //need to create a new user in the database for ip only users or validation fails due to key refs.
+    //console.log(user);
+  
   } else { 
-    console.log(req.user)
+    //console.log(req.user.provider)
     next();
   }
 };

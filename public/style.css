@@ -35,14 +35,14 @@ p {
   
 }
 .bar { 
-  width: 700px;
+  width: 600px;
   background-color:navy;
   color: white;
   margin: 2px;
 }
 
 .dm { 
-  width: 600px;
+  width: 500px;
   background-color: navy;
   color: white;
 }
@@ -67,6 +67,11 @@ p {
 .selectedPoll {
   background-color: indianred;
   height:200px;
+}
+
+.selectedOption {
+  background-color: pink;
+  
 }
 
 
@@ -121,6 +126,10 @@ footer {
 
 footer > a {
   color: #BBBBBB;
+}
+.right {
+  float: right;  
+  width: 600px;
 }
 
 .nicejob {

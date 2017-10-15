@@ -5,10 +5,9 @@
 // add other scripts at the bottom of index.html
 
 $(function() {
-  console.log(':)');
-  isAuth();
-  refreshPolls(); 
-  
+  //global chart var to help with weird chart hover problem
+  var chart;   
+  refreshPolls();  
 
 
 
@@ -22,60 +21,44 @@ function refreshPolls() {
     $('div').click(function(){
       $('.selectedPoll').removeClass('selectedPoll');
       $('#results').remove();
+      $('#myChart').empty();
+      
       $(this).addClass('selectedPoll');
       $('<container id="results"></container>').appendTo(this);
       var id=$(this).find('.hidden').text();
-      $.get('/polls/select/'+id, function(opts){
-        opts.forEach(function(opt){
-          //alert(opt.user);
+      $.get('/polls/select/'+id, function(opts){                
+        opts.forEach(function(opt){          
           var o=opt.option+'<span class="hidden option">'+opt._id+'</span>';
-          $('<div class="barSub"></div>').html(o).appendTo('#results');
-        })
+          $('<div class="barSub" ></div>').html(o).appendTo('#results');
+        });         
+      $.get('/polls/display/'+id, function(data){
+        //important! destroy old chart or get weird hover behavior
+        if (chart) chart.destroy();
+        var ctx = document.getElementById('myChart').getContext('2d');
+        chart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels:data.labels,
+            datasets: [{label: data.poll_name,
+              backgroundColor:['rgb(252, 155, 168)', 'rgb(152, 255, 168)','rgb(152, 155, 268)'],
+                   data: data.votes,
+                  }]
+            }
+        });
+      });        
+      //click to vote   
+          $('div.barSub').click(function(){
+            $(this).addClass('selectedOption');            
+            var opt_id=$(this).find('.hidden').text();            
+            $.post('polls/vote/'+opt_id)
+          })
+          
+      //polls/select/id ends here 
       });
-    //$("#temp").text(id);
-  })
+    //end div click funtion  
+    })
   });  
 }
-   
-function selectPoll(element){
-  var $div=$(element);   
-  //var id= $div.find('.hidden').text(); 
-  //$("#temp").text(id);
-  //$.post('/polls/select/'+id);   
-}
-  
-  function isAuth(){
-    //$.get('/authRoute', function(){
-      //alert(user);
-      //user parse json
-      //username display on page
-      //if (){
-       // $('#auth').empty();
-       //$('#auth').html('<a href="/logoff">Log off</a>')
-      
-      //}
-      //else
-      //$('#auth').empty();
-      //$('#auth').html('<a href="/login">Log In</a>')
-      
-   // })
-  }
-  
-  
-});
-  /*
-  function upvote(element){
-    var $div=$(element);    
-     var id=$div.find('.hidden').text();   
-    $("#temp").text(id);
-   $.post('/polls/select/'+id);
-   
- } 
-  function change(element){
-    var $div=$(element);
-    $div.css("color","red");
-  }
-  */
 
-//<span class="up">'+dream.upvotes+'</span>
+});
+
      
