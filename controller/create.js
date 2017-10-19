@@ -1,10 +1,9 @@
-$(function() {
-  console.log('hello world :o');
+$(function() {  
   var pollname;
   
   $('#pollname').submit(function(event) {    
     event.preventDefault();
-    pollname = $('#name').val();
+    pollname = $('#name').val();    
     $('h2').text(pollname);
     $('#pollname').toggleClass('hidden');
     $('#options').toggleClass('hidden');

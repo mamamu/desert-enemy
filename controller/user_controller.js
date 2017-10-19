@@ -1,6 +1,6 @@
-$(function() {
-  
+$(function() {  
   gotUser();
+  
   
 function gotUser(){
     $.get('/authRoute', function(user){
@@ -13,11 +13,12 @@ function gotUser(){
       }
       
       //change the logon/logoff and greet the user
-      if (user.user_id){
+      if (user.user_id){        
         $('#temp').html("Hi  "+name+"!!!!!");
         $('#logoff').removeClass('hidden');
         $('#login').addClass('hidden');
-      } else if (!user.user_id){
+        
+      } else if (!user.user_id){        
         $('#logoff').addClass('hidden');
         $('#login').removeClass('hidden');
       }
@@ -25,5 +26,10 @@ function gotUser(){
    })
   }
   
+
   
-});
+
+})
+  
+  
+  
