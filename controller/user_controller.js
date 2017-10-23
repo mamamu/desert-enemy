@@ -14,7 +14,7 @@ function gotUser(){
       
       //change the logon/logoff and greet the user
       if (user.user_id){        
-        $('#temp').html("Hi  "+name+"!!!!!");
+        //$('#temp').html("Hi  "+name+"!!!!!");
         $('#logoff').removeClass('hidden');
         $('#login').addClass('hidden');
         

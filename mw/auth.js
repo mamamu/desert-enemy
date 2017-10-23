@@ -41,6 +41,7 @@ module.exports={
     next();
   }
   },
+
   
   requireLogin:function(req, res, next){
   if (req.isAuthenticated()){ 
@@ -48,10 +49,19 @@ module.exports={
     return next();
   }
   else{
-    console.log("No user");    
-    res.redirect('/login');
+    console.log("No user");  
+    //redirect to login page
+    res.redirect('/login');    
   }
 },
+  getProfilebyIp:function(req){
+    var head=req.headers['x-forwarded-for'] ; 
+    var newUserIp;     
+    newUserIp=head.slice(0,11);
+    var profileId=newUserIp.replace(/\./g, "");
+    return profileId;
+  },
+  
   //this was working but broke and ive moved it back into server.
   checkIp:function(req, res){    
     var user_Id;
@@ -62,14 +72,14 @@ module.exports={
     var profileId=newUserIp.replace(/\./g, "");
     var promise=User.findOne({profile_id:profileId}).exec();
     promise.then(function(user){
+      console.log(user);
         user_Id=user._id; 
         return user_Id;
       });  
   } else {
+    console.log(req.user);
     user_Id=req.user._id; 
-  }
-    
-  
-   
-  }
-};
+    return user_Id
+  } 
+  },
+}

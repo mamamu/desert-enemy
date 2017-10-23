@@ -2,6 +2,8 @@ var auth=require('./mw/auth.js');
 var data=require('./mw/data.js');
 var datastore = require("./controller/datastore.js");
 
+var Chart = require('chart.js');
+
 var mongoose=require('mongoose');
 var Poll = require('./models/Poll.js');
 var Poll_Option = require('./models/Poll_Option.js');
@@ -112,6 +114,10 @@ app.get("/create", auth.requireLogin, function (req, res) {
   res.sendFile(__dirname + '/views/create.html');
 });
 
+app.get("/profile", auth.requireLogin, function (req, res) {
+  res.sendFile(__dirname + '/views/profile.html');
+});
+
 app.get("/login", function (req, res) {
   res.sendFile(__dirname + '/views/login.html');
 });
@@ -124,13 +130,24 @@ app.get('/logoff', function(req, res) {
 
 //this creates the new poll name
 app.post("/create/new/:pollname", auth.requireLogin, function (req, res) {  
-  datastore.createPoll(req, res, Poll); 
+  datastore.createPoll(req, res, Poll);   
 })
   
 //this adds options to a created poll name
-app.post("/create/name/:pollname/:option", auth.requireLogin, function (req, res){   
+app.post("/create/id/:pollId/:option", auth.requireLogin, function (req, res){   
   datastore.createOption(req, res, Poll_Option, Poll);
 });
+
+app.get("/created/", auth.requireLogin, function(req, res){
+  //console.log(req.user);
+  var id=req.user._id;
+  datastore.getAll(req, res, Poll, {user:id}, ["_id","poll_name"]);
+})
+
+app.get("/voted/", auth.requireLogin, function(req, res){  
+  var id=req.user._id;
+  datastore.userVotedFor(req, res, id, Vote);
+})
 
 //get list of polls from the database and push to poll array for display on page /currently limited to 20 most recent
 app.get("/polls", function (req, res) {   
@@ -138,6 +155,8 @@ app.get("/polls", function (req, res) {
 });
 
 //get everything in the right order and format to pass to chartjs for the display.
+//need to make sure this doesn't load from the cache
+
 app.get("/polls/display/:id", function (request, response){  
   var id=request.params.id;
   datastore.getForDisplay(request, response, Poll_Option, {in_poll:id}, ["option", "_id"], Vote);
@@ -153,38 +172,26 @@ app.get("/polls/select/:id", function (req, res){
 app.post('/polls/vote/:opt_id', auth.requireUser, function(req, res){  
   //to allow for anon users to vote --requireUser function checks for user and if none creates a anon/ip user in database
   //below var assigns either the req.user._id, or looks up the user by ip in the database
-  /*
-  this was working, now not working.  troubleshoot.  until then moved back into this route.
-  var userId=auth.checkIp(req, res);
-  console.log(auth.checkIp(req, res));
-  */
-  
+ 
   var userId;
   if (req.user){
     userId=req.user._id;
     datastore.upvoteOption(req, res, userId, Poll_Option, Vote);
   }
     else if (!req.user){
-    var head=req.headers['x-forwarded-for'] ; 
-    var newUserIp;     
-    newUserIp=head.slice(0,11);
-    var profileId=newUserIp.replace(/\./g, "");
-    var promise=User.findOne({profile_id:profileId}, function (err, user){
-      
-      if (err) console.error(err);
-      
-      userId=user._id;
-      console.log(userId)
-      
+      var profileId=auth.getProfilebyIp(req); 
+      var promise=User.findOne({profile_id:profileId}, function (err, user){      
+        if (err) console.error(err);
+      })
+      promise.then(function (user){
+        userId=user._id;        
+      datastore.upvoteOption(req, res, userId, Poll_Option, Vote);
     })
-    promise.then(function (userId){
-    datastore.upvoteOption(req, res, userId, Poll_Option, Vote);
-  })
-    }
-  //datastore.upvoteOption(req, res, userId, Poll_Option, Vote);
-    
- 
+    }; 
+
 })
+
+
 
 //auth routes for passport
 app.get('/auth/google', passport.authenticate('google'));
@@ -209,7 +216,7 @@ app.get('/authRoute', auth.requireLogin, function(req, res){
 				res.json(req.user);
 			}
   else {    
-    res.redirect('/login')
+    res.send(false)
   }
 })
 

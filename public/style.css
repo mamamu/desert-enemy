@@ -8,6 +8,8 @@
   box-sizing: border-box;
 }
 
+
+
 body {
   font-family: helvetica, arial, sans-serif;
   margin: 25px;
@@ -18,67 +20,100 @@ h1 {
   color: pink;
 }
 
-.bold {
-  font-weight: bold;
-}
+
 
 p {
-  max-width: 600px;
+  max-width: 45%;
 }
 
+
+/*
 .ct {   
   color: navy;  
   padding: 0px, 10px;
   background-color:pink;
   margin-left: 4px;
   margin-right: 40px;
+ 
+}
+*/
+.addOpt {
+  
+  background-color: pink;
+  display: inline-block;
+  width: 80%;
+  max-width: 500px;
+  border-radius: 3px;
+  
   
 }
 .bar { 
-  width: 600px;
+  width: 45%;
   background-color:navy;
   color: white;
   margin: 2px;
 }
-
+/* 
 .dm { 
-  width: 500px;
+  width: 40%;
   background-color: navy;
   color: white;
+}
+*/
+.bold {
+  font-weight: bold;
 }
 
 .hidden {
  display: none;  
 }
 
+.right {
+  float: right;  
+  width: 45%;
+  margin-right: 50px;
+  
+  
+}
+
+canvas {
+  position: fixed;
+}
+/*
 .up {
   background-color: ivory;
   font: 1.5em;
 }
-
+*/
 .barSub {
   background-color: ivory;
   color: navy;
   font: 1.5em;
-  width: 400px;
+  width: 90%;
+  padding: 2px;
   margin: 2px 20px;
+  cursor: pointer;
+}
+
+.barSub:hover{
+  background-color: yellow;
 }
 
 .selectedPoll {
-  background-color: indianred;
-  height:200px;
+  background-color: pink;
+  color: navy;
+  height:auto;
 }
 
 .selectedOption {
-  background-color: pink;
-  
+  background-color: pink;  
 }
 
 
 form {
-  margin-bottom: 25px;
-  padding: 15px;
-  background-color: cyan;
+  margin-bottom: 5px;
+  padding: 5px;
+  background-color: navy;
   display: inline-block;
   width: 100%;
   max-width: 340px;
@@ -102,6 +137,7 @@ button {
   border: 1px solid grey;
   box-shadow: 2px 2px teal;
   cursor: pointer;
+  margin:3px;
 }
 
 button:hover {
@@ -127,11 +163,10 @@ footer {
 footer > a {
   color: #BBBBBB;
 }
-.right {
-  float: right;  
-  width: 600px;
-}
 
+
+/*
 .nicejob {
   text-decoration: line-through;
 }
+*/

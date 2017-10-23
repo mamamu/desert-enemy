@@ -1,0 +1,34 @@
+<html>
+  <head>
+  <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <header>
+      <a id="logoff" class="hidden" href="/logoff">Log Off</a><a id="login" href="/login">Log In</a>|<a href="/">Home</a>
+      <h1>User Profile</h1>
+      
+      <h2></h2>
+    </header>
+
+    <main>
+      <p class="right"><canvas id="myChart" class="hidden"></canvas></p>
+      <h2>Polls Created</h2>
+      <div id="pollsCreated">
+        
+      </div>
+      
+      <h2 >Polls Voted In</h2>
+       <div id="pollsVoted">
+        
+      </div>
+    </main>
+    
+    
+  </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+  <script src="https://code.jquery.com/jquery-2.2.1.min.js"
+            integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
+            crossorigin="anonymous"></script>
+    <script src="/profile.js"></script>
+  <script src="/user_controller.js"></script>
+</html> 
