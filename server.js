@@ -122,6 +122,10 @@ app.get("/login", function (req, res) {
   res.sendFile(__dirname + '/views/login.html');
 });
 
+app.get('/errorpage', function (req, res) {
+  res.sendFile(__dirname + '/views/error.html');
+});
+
 app.get('/logoff', function(req, res) {  
   req.logOut();   
   res.redirect('/');     
@@ -138,60 +142,51 @@ app.post("/create/id/:pollId/:option", auth.requireLogin, function (req, res){
   datastore.createOption(req, res, Poll_Option, Poll);
 });
 
-app.get("/created/", auth.requireLogin, function(req, res){
-  //console.log(req.user);
+//gets the polls created by a specific user for display on their profile page
+app.get("/created/", auth.requireLogin, function(req, res){  
   var id=req.user._id;
   datastore.getAll(req, res, Poll, {user:id}, ["_id","poll_name"]);
 })
 
-app.get("/voted/", auth.requireLogin, function(req, res){  
+//gets the ids of the options for the logged in user to change page display for both the profile and main index page
+app.get("/voted/", auth.requireLogin, function(req, res){   
   var id=req.user._id;
   datastore.userVotedFor(req, res, id, Vote);
 })
 
 //get list of polls from the database and push to poll array for display on page /currently limited to 20 most recent
-app.get("/polls", function (req, res) {   
+app.get("/polls", function (req, res) {     
   datastore.getAll(req, res, Poll, {}, ["_id", "poll_name"]);
 });
 
 //get everything in the right order and format to pass to chartjs for the display.
-//need to make sure this doesn't load from the cache
-
 app.get("/polls/display/:id", function (request, response){  
   var id=request.params.id;
   datastore.getForDisplay(request, response, Poll_Option, {in_poll:id}, ["option", "_id"], Vote);
 });
 
-app.get("/polls/select/:id", function (req, res){ 
-  //this one assembles the clickable voting list for the individual polloptions in the display 
+//this one assembles the clickable voting list for the individual polloptions in the display
+app.get("/polls/select/:id", function (req, res){    
   var id=req.params.id;   
   datastore.getAll(req, res, Poll_Option, {in_poll:id}, ["_id", "option"]); 
 });
 
-//need to check if user/ip has voted  
-app.post('/polls/vote/:opt_id', auth.requireUser, function(req, res){  
-  //to allow for anon users to vote --requireUser function checks for user and if none creates a anon/ip user in database
-  //below var assigns either the req.user._id, or looks up the user by ip in the database
- 
+//to allow for anon users to vote --first requireUser function checks for user and if none creates a anon/ip user in database
+//checkip then gets the database userid for the ip user saved into req.userByIP, 
+//to disallow multiple votes by both types uservotedinpoll checks, then saves a userVoted bool into the req
+app.post('/polls/vote/:poll_id/:opt_id', auth.requireUser, auth.checkIp, data.userVotedinPoll, function(req, res){    
+  if (req.userVoted==true){    
+    res.send('userVoted');
+  } else { 
   var userId;
   if (req.user){
-    userId=req.user._id;
-    datastore.upvoteOption(req, res, userId, Poll_Option, Vote);
-  }
-    else if (!req.user){
-      var profileId=auth.getProfilebyIp(req); 
-      var promise=User.findOne({profile_id:profileId}, function (err, user){      
-        if (err) console.error(err);
-      })
-      promise.then(function (user){
-        userId=user._id;        
-      datastore.upvoteOption(req, res, userId, Poll_Option, Vote);
-    })
+    userId=req.user._id;    
+  } else if (!req.user){ 
+      userId=req.userByIP;      
     }; 
-
+  datastore.upvoteOption(req, res, userId, Poll_Option, Vote);
+  }
 })
-
-
 
 //auth routes for passport
 app.get('/auth/google', passport.authenticate('google'));
@@ -216,7 +211,7 @@ app.get('/authRoute', auth.requireLogin, function(req, res){
 				res.json(req.user);
 			}
   else {    
-    res.send(false)
+    res.send(false);
   }
 })
 

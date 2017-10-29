@@ -14,24 +14,10 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 var data=require('../mw/data.js');
 var auth=require('../mw/auth.js')
 
-//don't need these on the page if I pass them in and write a bit more abstractly
-//var Poll = require('../models/Poll.js');
-//var Poll_Option = require('../models/Poll_Option.js');
-//var User = require('../models/User.js');
-//var Vote = require('../models/Vote.js');
-
-
-  
-  /*
-
- */
-
-
-
 
 module.exports = {
-  //create poll name on create page
-  //might need to change--can it return _id?
+  
+  //create poll name on create page  
   createPoll: function(req, res, savemodel){
     var currentItem= new savemodel( {poll_id: new mongoose.Types.ObjectId(),
                               poll_name:req.params.pollname,
@@ -42,10 +28,10 @@ module.exports = {
     res.status(200).send(obj);
   })  
   }, 
-  //after creating poll name, create option on create page.  this is currently a list of up to 4 but possibly rework to be dynamic
-  createOption: function(req, res, savemodel, searchmodel){
-   // var query=searchmodel.findOne({poll_name:req.params.pollname}, function(err, poll_id){
-   // if (err) console.error(err);    
+  
+  //after creating poll name, create option on create page.  this is currently a list of up to 4 but could possibly rework to be dynamic
+  //this is also used when adding an additional option while logged in on the index page.  (uses same route as above)
+  createOption: function(req, res, savemodel, searchmodel){   
     var currentOption=new savemodel({
                                   option:req.params.option,
                                   in_poll:req.params.pollId, 
@@ -53,20 +39,21 @@ module.exports = {
     currentOption.save(function(err) {   
       if (err) console.error(err);
       console.log("save"); 
-      });
-    //});    
+      });       
   res.sendStatus(200);   
   },
+  
   //get all items matching a query(searchObject) and process results using resultsArray  returns an array of objects
-  getAll: function(req, res, searchmodel, searchObject, resultsArray){
+  getAll: function(req, res, searchmodel, searchObject, resultsArray, voteModel){    
     var promise=searchmodel.find(searchObject).sort('-created_at').exec();
-    promise.then(function(items){
+    promise.then(function(items){ 
       var Arr=data.processResults(items, resultsArray);
       res.send(Arr);
     }).catch(function(err){
     console.error(err);
   });
   },
+  
   //get an individual poll, search for options/votes and process results in the right format to send to chartjs
   getForDisplay: function(req, res, searchmodel, searchObject, resultsArray, submodel){        
   var optObjArray=[]; 
@@ -94,35 +81,36 @@ module.exports = {
         console.error(err);
       });
   },
-  //does exactly what you'd expect
-  upvoteOption: function(req, res, userId, searchmodel, savemodel){     
+  
+  //does exactly what you'd expect ;)
+  upvoteOption: function(req, res, userId, searchmodel, savemodel){
     searchmodel.findOne({_id:req.params.opt_id}, function(err, option){        
-    if (err) console.err(err);       
-    var current=option.in_poll;    
+    if (err) console.error(err);       
+    var current=option.in_poll;
+      
     var newVote = new savemodel ({  
         poll: current,
         option: req.params.opt_id,
         user: userId,
   })     
     newVote.save(function(err){
-      if(err)console.log(err);
+      if(err)console.error(err);
       res.sendStatus(200);
     })     
   })     
   },
+  
   //get the list of votes a user made and populate the pollname from the poll table then return an array of processed objects
   //can't use the process function easily because of the populate.
   userVotedFor: function(req, res, userId, searchmodel){
     var promise=searchmodel.find({user:userId}).populate("poll", "poll_name").exec();
-    promise.then(function (results){
+    promise.then(function (results){      
       var Array=[];        
-      results.forEach(function(result){
-        var obj={pollname:result.poll.poll_name, poll_id: result.poll._id }
+      results.forEach(function(result){        
+        var obj={pollname:result.poll.poll_name, poll_id: result.poll._id, option: result.option }
         Array.push(obj);        
-      })
-      //console.log(Array);
+      });      
       res.send(Array);
       })    
   },
- 
 }

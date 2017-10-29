@@ -1,3 +1,6 @@
+var Vote = require('../models/Vote.js');
+var User = require('../models/User.js');
+
 module.exports={
 //process an array of objects to create an array of selected fields
   //this is used in datastore.js to process results from the database 
@@ -21,6 +24,29 @@ module.exports={
         Array.push(item[fieldName]) ;  
   })
     return Array;
-  }
+  },
+  
+  userVotedinPoll: function(req, res, next){       
+   var userId;
+    if (req.user){
+    userId=req.user._id;
+    } else {
+      userId=req.userByIP;
+    };
+      var promise=Vote.findOne({
+         user:userId,
+         poll: req.params.poll_id
+       }).populate("option", "option").exec();
+      promise.then(function (result){         
+        if (!result){
+          req.userVoted=false;          
+          next();        
+        } else {          
+          req.userVoted=true;        
+          next();
+        }
+    })
+  },
+
   
 }

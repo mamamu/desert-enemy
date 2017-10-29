@@ -4,6 +4,7 @@
 /* You might want to try something fancier: */
 /* less: http://lesscss.org/ */
 
+
 * {
   box-sizing: border-box;
 }
@@ -15,9 +16,28 @@ body {
   margin: 25px;
 }
 
-h1 {
+header {
+  background-color: #714965; 
+  background: linear-gradient(to bottom right, #714965, #FFFFFF);
+  color: white;
+  padding: .5em 1em;
+}
+
+header a {
+  color: white;
+  padding: .2em 2em 0em 2em;
+}
+
+header p {
+  color: white; 
+  padding: 0em 2em;
+}
+
+h1 {  
   font-weight: bold;
-  color: pink;
+  color: #3d072d;
+  text-align: right;
+  margin-right: 2em;
 }
 
 
@@ -27,39 +47,32 @@ p {
 }
 
 
-/*
-.ct {   
-  color: navy;  
-  padding: 0px, 10px;
-  background-color:pink;
-  margin-left: 4px;
-  margin-right: 40px;
- 
+.userVote {
+  color: #3d072d;  
+  font-weight: bold;
 }
-*/
-.addOpt {
-  
-  background-color: pink;
+
+.unclickable{
+  pointer-events: none;  
+}
+
+.addOpt {  
+  background-color: #7dcd85;
   display: inline-block;
   width: 80%;
   max-width: 500px;
-  border-radius: 3px;
-  
+  border-radius: 3px; 
   
 }
+
 .bar { 
   width: 45%;
-  background-color:navy;
+  background-color: #222a68;  
   color: white;
   margin: 2px;
+  padding: .2em .7em;
 }
-/* 
-.dm { 
-  width: 40%;
-  background-color: navy;
-  color: white;
-}
-*/
+
 .bold {
   font-weight: bold;
 }
@@ -71,23 +84,16 @@ p {
 .right {
   float: right;  
   width: 45%;
-  margin-right: 50px;
-  
-  
+  margin-right: 50px; 
 }
 
 canvas {
   position: fixed;
 }
-/*
-.up {
-  background-color: ivory;
-  font: 1.5em;
-}
-*/
+
 .barSub {
   background-color: ivory;
-  color: navy;
+  color: #222a68;
   font: 1.5em;
   width: 90%;
   padding: 2px;
@@ -96,24 +102,24 @@ canvas {
 }
 
 .barSub:hover{
-  background-color: yellow;
+  background-color: #f2e87b;
 }
 
 .selectedPoll {
-  background-color: pink;
-  color: navy;
+  background-color: #7dcd85;
+  color: #222a68;
   height:auto;
 }
 
 .selectedOption {
-  background-color: pink;  
+  background-color: #7dcd85;  
 }
 
 
 form {
   margin-bottom: 5px;
   padding: 5px;
-  background-color: navy;
+  background-color: #222a68;
   display: inline-block;
   width: 100%;
   max-width: 340px;
@@ -135,13 +141,13 @@ button {
   border-radius: 3px;
   background-color: lightgrey;
   border: 1px solid grey;
-  box-shadow: 2px 2px teal;
+  box-shadow: 2px 2px navy;
   cursor: pointer;
   margin:3px;
 }
 
 button:hover {
-  background-color: yellow;
+  background-color: #f2e87b;
 }
 
 button:active {

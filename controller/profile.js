@@ -2,6 +2,7 @@ $(function() {
   
   var created_by;
   var chart;
+ 
   function getDisplay(pollid){
     $.get('/polls/display/'+pollid, function(data){
         //important! destroy old chart or get weird hover behavior
@@ -25,7 +26,7 @@ $(function() {
            options: {
               scales: {
                 //xaxis ticks rotated because some labels are long and throwing off the display
-                //at some point fix the incoming labels instead https://stackoverflow.com/questions/21409717/chart-js-and-long-labels
+                //at some point could fix the incoming labels to line break https://stackoverflow.com/questions/21409717/chart-js-and-long-labels
                 xAxes: [{
                   ticks: {
                     minRotation:75,
@@ -46,6 +47,35 @@ $(function() {
         
       });      
   }
+  function getVotedOptions(){       
+    $.get('/voted/', function(votes){
+      
+              var opsArray=[];
+              var $options=$('.option'); 
+             console.log($options);
+                $options.each(function(index){
+                  opsArray.push( index + ": " + $options[index].innerText );
+                });  
+                 console.log(opsArray);
+      
+              votes.forEach(function(vote){                
+                var votedOption=vote.option;
+                for (var u=0; u<opsArray.length; u++){
+                  if (opsArray[u].indexOf(votedOption)!=-1){ 
+                    $options.each(function(index){
+                      if (index==u){                        
+                        if (($(this).parent().text()).indexOf('you voted for...')==-1){
+                          $(this).parent().prepend("you voted for... ");
+                        }                                           
+                        $(this).parent().addClass('userVote');
+                        $('.selectedPoll').addClass('unclickable');
+                      }
+                    })
+                  }                  
+                }
+              })
+            })
+  }
   
   $.get('/authroute', function(user){
      
@@ -57,7 +87,7 @@ $(function() {
          $('.bar').click(function(){
       $('.selectedPoll').removeClass('selectedPoll');
       $('#results').remove();
-      $(this).addClass('selectedPoll');
+      $(this).addClass('selectedPoll unclickable');
       $('<container id="results"></container>').appendTo(this);
       var id=$(this).find('.hidden').text(); 
       getDisplay(id);
@@ -66,11 +96,14 @@ $(function() {
           var o=opt.option+'<span class="hidden option">'+opt._id+'</span>';
           $('<div class="barSub" ></div>').html(o).appendTo('#results');
         }); 
-      }); 
+       getVotedOptions();  
+      });         
+          
     });
  
     
     })
+    
     
    $.get('/voted/', function(votes){        
       votes.forEach(function(vote){         
@@ -92,12 +125,14 @@ $(function() {
           $('<div class="barSub" ></div>').html(o).appendTo('#results');
         }); 
       }); 
-      
+      getVotedOptions();
     });
-   
-    }) 
+   })
+    //end /voted/
      
-  
-})  
-  
+   
+    })
+     
+
 })
+

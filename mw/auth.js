@@ -5,29 +5,23 @@ module.exports={
   
   requireUser: function(req, res, next) {
   if (!req.user) {  
-    ///create user here and add to database
-    //console.log(req.headers['x-forwarded-for']);
+    ///create IP user here and add to database    
     var head=req.headers['x-forwarded-for']  
-    var newUserIp; 
-    //console.log(head);
+    var newUserIp;     
     newUserIp=head.slice(0,11);
     var profileId=newUserIp.replace(/\./g, "");
     
-    User.findOne({profile_id:profileId}, function (err, user){
-      //console.log(user)
+    User.findOne({profile_id:profileId}, function (err, user){      
       if (!user){
         var newUser = new User();
           newUser.user_id = new mongoose.Types.ObjectId(),
         	newUser.profile_id = profileId;
 					newUser.username = 'Anon_User';
 					newUser.provider = 'IP';
-					//console.log(newUser);
-
-					newUser.save(function (err) {
-						if (err) {
-							console.log(err); 
-						}
-            console.log("Ip save");
+					
+					newUser.save(function (err, user) {
+						if (err) console.error(err); 						
+            console.log(user._id);
             next();
           }); 
       }
@@ -36,34 +30,25 @@ module.exports={
         }
       
     })
-  } else { 
-    console.log("not !user")
+  } else {     
     next();
   }
   },
 
   
   requireLogin:function(req, res, next){
-  if (req.isAuthenticated()){ 
-    console.log("auth in reqLog")
+  if (req.isAuthenticated()){     
     return next();
   }
-  else{
-    console.log("No user");  
-    //redirect to login page
+  else{         
     res.redirect('/login');    
   }
 },
-  getProfilebyIp:function(req){
-    var head=req.headers['x-forwarded-for'] ; 
-    var newUserIp;     
-    newUserIp=head.slice(0,11);
-    var profileId=newUserIp.replace(/\./g, "");
-    return profileId;
-  },
   
-  //this was working but broke and ive moved it back into server.
-  checkIp:function(req, res){    
+
+  //this checks ip, checks database, and saves the ip user's user_id in the req 
+  //used for voting for ip user only
+  checkIp:function(req, res, next){    
     var user_Id;
     if (!req.user){    
     var head=req.headers['x-forwarded-for'] ; 
@@ -71,15 +56,14 @@ module.exports={
     newUserIp=head.slice(0,11);
     var profileId=newUserIp.replace(/\./g, "");
     var promise=User.findOne({profile_id:profileId}).exec();
-    promise.then(function(user){
-      console.log(user);
-        user_Id=user._id; 
-        return user_Id;
+    promise.then(function(user){      
+        req.userByIP=user._id; 
+        next();
       });  
-  } else {
-    console.log(req.user);
-    user_Id=req.user._id; 
-    return user_Id
   } 
+    else if (req.user){      
+      next();
+    }
+    
   },
 }
