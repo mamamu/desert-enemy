@@ -22,10 +22,17 @@ todos (only bullet point items still waiting for completion)
 //* function to check if voted on a poll already
 //* display function to highlight the user choice when displaying polls--this needs to be accessible to the index and the profile pages. There are possibly other display functions that could be for both.  ID these.
 //then refactoring
+//* change display of addl option form--eliminate flash
+//* work on css/display/color etc
 
-* change display of addl option form--eliminate flash
-* work on css/display/color etc
-* passport?
+* add sharing interface on profile
+* delete option for polls created on profile
+* possibly stats/pie chart with total votes for each created poll on profile
+* add responsive # of options on create
+* change index to include pagination of poll list 
+* --also need to change datastore function for above change
+* ?possible to pull out some controller display functions/language esp that are common between multiple views?
+* ?passport?
 
 
 

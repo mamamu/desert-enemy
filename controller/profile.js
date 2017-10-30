@@ -1,3 +1,4 @@
+
 $(function() {
   
   var created_by;
@@ -47,6 +48,7 @@ $(function() {
         
       });      
   }
+  
   function getVotedOptions(){       
     $.get('/voted/', function(votes){
       

@@ -3,12 +3,59 @@ $(function() {
   //global chart var to help with weird chart hover problem
   var chart;   
   refreshPolls();  
+  
+  //call this to get the chart 
+  function getDisplay(pollid){
+    $.get('/polls/display/'+pollid, function(data){
+        //important! destroy old chart or get weird hover behavior
+      //!Chart is defined elsewhere, don't worry about it
+        //also important: have to set options to begin at zero or chart begins with lowest value in data array
+        if (chart) chart.destroy();  
+        var ctx = document.getElementById('myChart').getContext('2d');
+        chart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels:data.labels,
+            datasets: [{label: data.poll_name,
+              backgroundColor:['rgba(255, 99, 132, 0.5)',
+                'rgba(54, 162, 235, 0.5)',
+                'rgba(255, 206, 86, 0.5)',
+                'rgba(75, 192, 192, 0.5)',
+                'rgba(153, 102, 255, 0.5)',
+                'rgba(255, 159, 64, 0.5)'],
+                   data: data.votes,
+                  }]
+            },
+           options: {
+              scales: {
+                //xaxis ticks rotated because some labels are long and throwing off the display
+                //at some point could fix the incoming labels to line break https://stackoverflow.com/questions/21409717/chart-js-and-long-labels
+                xAxes: [{
+                  ticks: {
+                    minRotation:75,
+                    maxRotation:90
+                  }
+                }],
+                  yAxes: [{
+                      ticks: {
+                          beginAtZero:true,
+                        maxTicksLimit: Math.min(11, 1 + Math.max.apply(null, data)),
+                        //stepSize: 1
+                        //this puts marker line on y axis for each whole number
+                      }
+                  }]
+              }
+          }
+        });
+        
+      });      
+  }
 
-
-
+//everything is wrapped in the refresh Polls function which is called on ready so that when you do one of the actions below 
+  //i.e. vote, the whole dom is updated to reflect it.  this is not needed on the profile page, and so that one doesn't have same structure
+  //even though it's doing many similar things
 function refreshPolls() {
    $('#pollspot').empty();
-  //call the route to get the list of polls and then display
+  //get the list of polls and then display
    $.get('/polls', function(polls) { 
     polls.forEach(function(poll) {
       var p=poll.poll_name+'<span class="hidden">'+poll._id+'</span>';      
@@ -35,7 +82,7 @@ function refreshPolls() {
           if (user._id){ 
             //below add the option form to add additional user option 
             $('<div id="temp2"></div>').html("").appendTo("#results");
-              $('<form id="additonalOption" class="addOpt"></form>').html('<label>Click above to vote or type a new option</label><span><input id="addOpt"></input><button id="submit" type="submit">Submit</button></span>').appendTo('#temp2')
+              $('<form id="additonalOption" class="addOpt hidden"></form>').html('<label>Click above to vote or type a new option</label><span><input id="addOpt"></input><button id="submit" type="submit">Submit</button></span>').appendTo('#temp2')
               $( "#addOpt" ).focus();
             var userHasVotedinPoll=false;
             //get what the user voted for and also the current active poll options-- find matches and display
@@ -62,10 +109,9 @@ function refreshPolls() {
                     })
                   }                  
                 }
-              })
-              
-              if (userHasVotedinPoll===true){                
-                $('form').addClass('hidden');              
+              })              
+              if (userHasVotedinPoll===false){                
+                $('form').removeClass('hidden');              
             }
             })
             ///voted/ ends here 
@@ -77,53 +123,10 @@ function refreshPolls() {
               })                
             })
           }         
-        })
+        })       
         
-        
-                  
-        
-      $.get('/polls/display/'+id, function(data){
-        //important! destroy old chart or get weird hover behavior
-        //!chart is defined elsewhere--don't worry about it
-        //also important: have to set options to begin at zero or chart begins with lowest value in data array
-        if (chart) chart.destroy();  
-        var ctx = document.getElementById('myChart').getContext('2d');
-        chart = new Chart(ctx, {
-            type: 'bar',
-            data: { labels:data.labels,
-            datasets: [{label: data.poll_name,
-              backgroundColor:['rgba(229, 77, 77, 0.5)',
-                'rgba(34, 42, 104, 0.5)',
-                'rgba(242, 232, 123, 0.5)',
-                'rgba(125, 205, 133, 0.5)',
-                'rgba(113, 73, 101, 0.5)',
-                'rgba(255, 159, 64, 0.5)'],
-                   data: data.votes,
-                  }]
-            },
-           options: {
-              scales: {
-                //xaxis ticks rotated because some labels are long and throwing off the display
-                //at some point fix the incoming labels instead https://stackoverflow.com/questions/21409717/chart-js-and-long-labels
-                xAxes: [{
-                  ticks: {
-                    minRotation:75,
-                    maxRotation:90
-                  }
-                }],
-                  yAxes: [{
-                      ticks: {
-                          beginAtZero:true,
-                        maxTicksLimit: Math.min(11, 1 + Math.max.apply(null, data)),
-                        //stepSize: 1
-                        //this puts marker line on y axis for each whole number
-                      }
-                  }]
-              }
-          }
-        });
-        
-      });        
+      getDisplay(id);          
+  
       //click to vote         
           $('div.barSub').click(function(){
             $(this).addClass('selectedOption');            

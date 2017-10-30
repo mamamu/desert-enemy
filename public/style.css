@@ -12,8 +12,8 @@
 
 
 body {
-  font-family: helvetica, arial, sans-serif;
-  margin: 25px;
+  /*font-family: helvetica, arial, sans-serif;
+  margin: 25px;*/
 }
 
 header {
@@ -26,6 +26,10 @@ header {
 header a {
   color: white;
   padding: .2em 2em 0em 2em;
+}
+
+header a:hover {
+  color: #f2e87b;
 }
 
 header p {
@@ -43,7 +47,8 @@ h1 {
 
 
 p {
-  max-width: 45%;
+  margin-top: 1em;
+  /*max-width: 45%;*/
 }
 
 
@@ -65,12 +70,12 @@ p {
   
 }
 
-.bar { 
-  width: 45%;
+.bar {   
   background-color: #222a68;  
   color: white;
   margin: 2px;
   padding: .2em .7em;
+  cursor: pointer;
 }
 
 .bold {
@@ -83,8 +88,13 @@ p {
 
 .right {
   float: right;  
-  width: 45%;
+  /*width: 45%;*/
   margin-right: 50px; 
+}
+
+.center{
+  margin-left: auto;
+  margin-right: auto;
 }
 
 canvas {
@@ -135,7 +145,7 @@ input {
   border-radius: 3px;
   font-size: 16px;
 }
-
+/*
 button {
   font-size: 16px;
   border-radius: 3px;
@@ -145,7 +155,7 @@ button {
   cursor: pointer;
   margin:3px;
 }
-
+*/
 button:hover {
   background-color: #f2e87b;
 }
