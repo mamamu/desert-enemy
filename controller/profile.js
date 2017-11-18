@@ -70,6 +70,7 @@ $(function() {
                           $(this).parent().prepend("you voted for... ");
                         }                                           
                         $(this).parent().addClass('userVote');
+                        //$(this).parent().siblings().addClass('unclickable');
                         $('.selectedPoll').addClass('unclickable');
                       }
                     })
@@ -87,18 +88,40 @@ $(function() {
       $('<div class="bar"></div>').html(p).appendTo('#pollsCreated');  
       })
          $('.bar').click(function(){
+           $('.sharedelete').remove();
+           
       $('.selectedPoll').removeClass('selectedPoll');
       $('#results').remove();
-      $(this).addClass('selectedPoll unclickable');
+      $(this).addClass('selectedPoll');
+      $('.selectedPoll').addClass('unclickable');
       $('<container id="results"></container>').appendTo(this);
       var id=$(this).find('.hidden').text(); 
       getDisplay(id);
+      $('<span class="right sharedelete"><a href="#" id="share">Share</a><a href="#" id="delete">Delete</a></span>').prependTo('.selectedPoll')
       $.get('/polls/select/'+id, function(opts){                
         opts.forEach(function(opt){          
           var o=opt.option+'<span class="hidden option">'+opt._id+'</span>';
           $('<div class="barSub" ></div>').html(o).appendTo('#results');
-        }); 
-       getVotedOptions();  
+        });
+        getVotedOptions(); 
+        
+        //add clickable to child link elements to override selected poll behavior for the links
+        $('#delete, #share').addClass('clickable');        
+        $('#delete').on('click', function(){          
+          $.get('/delete/'+id, function(ret){            
+            if (ret=="OK"){
+                window.location.href=('/profile');
+              };
+          });
+        });
+        $('#share').on('click', function(){          
+          $.get('/share/'+id, function(ret){            
+            if (ret=="OK"){
+                window.location.href=('/detail/?id='+id);
+              };
+          });
+        });
+        //need to add share here
       });         
           
     });

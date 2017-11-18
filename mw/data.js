@@ -1,5 +1,6 @@
 var Vote = require('../models/Vote.js');
 var User = require('../models/User.js');
+var Poll = require('../models/Poll.js');
 
 module.exports={
 //process an array of objects to create an array of selected fields
@@ -47,6 +48,20 @@ module.exports={
         }
     })
   },
-
+pollToBeDeletedWasCreatedByUser: function(req, res, next){
+  var poll=req.params.id;
+  var userId=req.user._id;
+  Poll.findOne({_id:poll, user:userId}, function (err, record){
+    if (err) {
+      console.error(err);
+      res.redirect('/');
+    }
+    else {
+    console.log(record);
+    next();
+    }
+  })
+  
+}
   
 }

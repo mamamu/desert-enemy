@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <container>
+  <body>
+    <header>
+      <nav class="navbar navbar-expand-lg">
+      <a id="logoff" class="hidden nav-link" href="/logoff">Log Off</a><a id="login" class="nav-link" href="/login">Log In</a><a class="nav-link" href="/">Home</a><a class="nav-link" href="/create">Create a Poll</a><a class="nav-link" href="/profile">Profile</a>
+      </nav>
+      <h1 id="pollname"></h1>
+      <h2 id="pollcreator"></h2>
+    </header>
+
+    <main><div class="row">
+      <div class="col">
+        <container id="pollspot">
+          
+        </container>
+        
+      </div>
+      <div class="col">
+        <canvas id="myChart" class="hidden"></canvas>
+      </div>
+     
+      </div>
+    </main>
+    
+    
+  </body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <script src="https://code.jquery.com/jquery-2.2.1.min.js"
+            integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
+            crossorigin="anonymous"></script>
+    
+    <script src="/detail.js"></script>
+    <script src="/user_controller.js"></script>
+  </container>
+</html> 

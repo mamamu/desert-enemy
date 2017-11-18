@@ -25,9 +25,11 @@ todos (only bullet point items still waiting for completion)
 //* change display of addl option form--eliminate flash
 //* work on css/display/color etc
 
-* add sharing interface on profile
-* delete option for polls created on profile
-* possibly stats/pie chart with total votes for each created poll on profile
+* add sharing interface on profile--button done--wire in route tested in other app.  also check for gmail oauth 2 and maybe other use case for those users.
+
+//* delete option for polls created on profile
+
+* possibly stats/pie chart with total votes for each created poll on profile--could put in same canvas--onload--then destroy for detail of each view.  link to get back?
 * add responsive # of options on create
 * change index to include pagination of poll list 
 * --also need to change datastore function for above change

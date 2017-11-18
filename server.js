@@ -106,7 +106,7 @@ app.use(expressSession({ secret:'watchfobfairies', resave: true, saveUninitializ
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get("/", function (req, res) {   
+app.get("/", function (req, res) {  
   res.sendFile(__dirname + '/views/index.html');
 });
 
@@ -126,6 +126,11 @@ app.get('/errorpage', function (req, res) {
   res.sendFile(__dirname + '/views/error.html');
 });
 
+app.get('/detail', function (req, res) {
+  //this is modified by querystring
+  res.sendFile(__dirname + '/views/detail.html');
+});
+
 app.get('/logoff', function(req, res) {  
   req.logOut();   
   res.redirect('/');     
@@ -141,6 +146,15 @@ app.post("/create/new/:pollname", auth.requireLogin, function (req, res) {
 app.post("/create/id/:pollId/:option", auth.requireLogin, function (req, res){   
   datastore.createOption(req, res, Poll_Option, Poll);
 });
+
+//post this?
+app.get("/delete/:id", auth.requireLogin, data.pollToBeDeletedWasCreatedByUser, function(req, res) {  
+  datastore.deletePoll(req, res, Poll);
+})
+
+app.get("/share/:id", auth.requireLogin, data.pollToBeDeletedWasCreatedByUser, function(req, res) {  
+  res.send("OK");
+})
 
 //gets the polls created by a specific user for display on their profile page
 app.get("/created/", auth.requireLogin, function(req, res){  
@@ -170,6 +184,7 @@ app.get("/polls/select/:id", function (req, res){
   var id=req.params.id;   
   datastore.getAll(req, res, Poll_Option, {in_poll:id}, ["_id", "option"]); 
 });
+
 
 //to allow for anon users to vote --first requireUser function checks for user and if none creates a anon/ip user in database
 //checkip then gets the database userid for the ip user saved into req.userByIP, 

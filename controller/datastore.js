@@ -42,6 +42,14 @@ module.exports = {
       });       
   res.sendStatus(200);   
   },
+  //delete poll (model pre should handle deletion cascade of all related options and votes)
+  deletePoll: function(req, res, searchmodel){     
+    searchmodel.findOne({_id: req.params.id}, function(err, poll){
+      if (err) console.error(err);      
+      poll.remove();
+    }) 
+    res.sendStatus(200); 
+  },
   
   //get all items matching a query(searchObject) and process results using resultsArray  returns an array of objects
   getAll: function(req, res, searchmodel, searchObject, resultsArray, voteModel){    

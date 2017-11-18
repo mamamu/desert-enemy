@@ -16,13 +16,22 @@ body {
   margin: 25px;*/
 }
 
+a {
+  color: white;  
+  padding: .2em 2em 0em 2em;
+}
+
+a:hover {
+  color: #f2e87b;
+}
+
 header {
   background-color: #714965; 
   background: linear-gradient(to bottom right, #714965, #FFFFFF);
   color: white;
   padding: .5em 1em;
 }
-
+/*
 header a {
   color: white;
   padding: .2em 2em 0em 2em;
@@ -31,7 +40,7 @@ header a {
 header a:hover {
   color: #f2e87b;
 }
-
+*/
 header p {
   color: white; 
   padding: 0em 2em;
@@ -59,6 +68,10 @@ p {
 
 .unclickable{
   pointer-events: none;  
+}
+
+.clickable{
+  pointer-events: auto;
 }
 
 .addOpt {  
@@ -122,6 +135,11 @@ canvas {
 }
 
 .selectedOption {
+  background-color: #7dcd85;  
+}
+
+.loginlinks {
+  padding: 1em;  
   background-color: #7dcd85;  
 }
 
