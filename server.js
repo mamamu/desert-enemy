@@ -1,6 +1,7 @@
 var auth=require('./mw/auth.js');
 var data=require('./mw/data.js');
 var datastore = require("./controller/datastore.js");
+var mail = require('./controller/mail.js');
 
 var Chart = require('chart.js');
 
@@ -11,7 +12,6 @@ var User = require('./models/User.js');
 var Vote = require('./models/Vote.js');
 
 var passport = require('passport');
-
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
 var GithubStrategy = require('passport-github').Strategy;
 
@@ -19,9 +19,11 @@ passport.use(new GoogleStrategy({
   clientID: process.env.CLIENT_ID,
   clientSecret: process.env.CLIENT_SECRET,
   callbackURL: 'https://'+process.env.PROJECT_DOMAIN+'.glitch.me/login/google/return',
-  scope: 'https://www.googleapis.com/auth/plus.login'
+  scope: ['https://www.googleapis.com/auth/plus.login',
+          'https://www.googleapis.com/auth/userinfo.email']
 },
-function(token, tokenSecret, profile, cb) {  
+function(token, tokenSecret, profile, cb) {   
+  //console.log(profile.emails[0].value);
   process.nextTick(function () {
     User.findOne({ 'profile_id': profile.id }, function(err, user){
       if (err){
@@ -52,7 +54,8 @@ passport.use(new GithubStrategy({
   clientSecret: process.env.GITHUB_SECRET,
   callbackURL: 'https://'+process.env.PROJECT_DOMAIN+'.glitch.me/login/github/return',  
 },
-function(token, tokenSecret, profile, cb) {  
+function(token, tokenSecret, profile, cb) { 
+  //console.log(profile._json.email)
   process.nextTick(function () {
     User.findOne({ 'profile_id': profile.id }, function(err, user){
       if (err){
@@ -110,6 +113,10 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
+app.get("/" +process.env.VER, function (req, res) {  
+  res.sendFile(__dirname+'/'+ process.env.VER);
+});
+
 app.get("/create", auth.requireLogin, function (req, res) {
   res.sendFile(__dirname + '/views/create.html');
 });
@@ -148,18 +155,22 @@ app.post("/create/id/:pollId/:option", auth.requireLogin, function (req, res){
 });
 
 //post this?
-app.get("/delete/:id", auth.requireLogin, data.pollToBeDeletedWasCreatedByUser, function(req, res) {  
+app.get("/delete/:id", auth.requireLogin, data.pollReferencedWasCreatedByUser, function(req, res) {  
   datastore.deletePoll(req, res, Poll);
 })
 
-app.get("/share/:id", auth.requireLogin, data.pollToBeDeletedWasCreatedByUser, function(req, res) {  
+app.post("/share/:id", auth.requireLogin, data.pollReferencedWasCreatedByUser, function(req, res) {    
+  var sender=req.query.sender;
+  var recipient=req.query.recipient;
+  var pollLink="https://desert-enemy.glitch.me/detail/?id="+req.params.id;    
+  mail.sendMessage(sender, recipient, pollLink);
   res.send("OK");
 })
 
 //gets the polls created by a specific user for display on their profile page
 app.get("/created/", auth.requireLogin, function(req, res){  
   var id=req.user._id;
-  datastore.getAll(req, res, Poll, {user:id}, ["_id","poll_name"]);
+  datastore.getAll(req, res, Poll, {user:id}, null, ["_id","poll_name"]);
 })
 
 //gets the ids of the options for the logged in user to change page display for both the profile and main index page
@@ -169,8 +180,9 @@ app.get("/voted/", auth.requireLogin, function(req, res){
 })
 
 //get list of polls from the database and push to poll array for display on page /currently limited to 20 most recent
-app.get("/polls", function (req, res) {     
-  datastore.getAll(req, res, Poll, {}, ["_id", "poll_name"]);
+app.get("/polls/?:page", function (req, res) {   
+  var page=parseInt(req.params.page);  
+  datastore.getAll(req, res, Poll, {}, page, ["_id", "poll_name"]);
 });
 
 //get everything in the right order and format to pass to chartjs for the display.
@@ -180,9 +192,11 @@ app.get("/polls/display/:id", function (request, response){
 });
 
 //this one assembles the clickable voting list for the individual polloptions in the display
-app.get("/polls/select/:id", function (req, res){    
+app.get("/polls/select/:id", function (req, res){  
+  //if more than 20 options in a poll, we have to figure out how to paginate options.  currently just set to null.
+  var page=null;
   var id=req.params.id;   
-  datastore.getAll(req, res, Poll_Option, {in_poll:id}, ["_id", "option"]); 
+  datastore.getAll(req, res, Poll_Option, {in_poll:id}, page,["_id", "option"]); 
 });
 
 

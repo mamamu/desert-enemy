@@ -21,7 +21,8 @@
     "cookie-parser": "^1.4.3",
     "express-session": "^1.15.6",
     "chart.js": "^2.7.0",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "nodemailer": "^4.4.0"
   },
   "engines": {
     "node": "8.x"

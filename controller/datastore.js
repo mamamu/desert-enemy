@@ -38,7 +38,7 @@ module.exports = {
                                   user:req.user._id});
     currentOption.save(function(err) {   
       if (err) console.error(err);
-      console.log("save"); 
+      //console.log("save"); 
       });       
   res.sendStatus(200);   
   },
@@ -52,8 +52,8 @@ module.exports = {
   },
   
   //get all items matching a query(searchObject) and process results using resultsArray  returns an array of objects
-  getAll: function(req, res, searchmodel, searchObject, resultsArray, voteModel){    
-    var promise=searchmodel.find(searchObject).sort('-created_at').exec();
+  getAll: function(req, res, searchmodel, searchObject, page, resultsArray, voteModel){    
+    var promise=searchmodel.find(searchObject).limit(10).skip(page).sort('-created_at').exec();
     promise.then(function(items){ 
       var Arr=data.processResults(items, resultsArray);
       res.send(Arr);

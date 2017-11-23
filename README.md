@@ -24,17 +24,19 @@ todos (only bullet point items still waiting for completion)
 //then refactoring
 //* change display of addl option form--eliminate flash
 //* work on css/display/color etc
-
-* add sharing interface on profile--button done--wire in route tested in other app.  also check for gmail oauth 2 and maybe other use case for those users.
-
+//* change index to include pagination of poll list 
+//* --also need to change datastore function for above change
 //* delete option for polls created on profile
 
-* possibly stats/pie chart with total votes for each created poll on profile--could put in same canvas--onload--then destroy for detail of each view.  link to get back?
-* add responsive # of options on create
-* change index to include pagination of poll list 
-* --also need to change datastore function for above change
-* ?possible to pull out some controller display functions/language esp that are common between multiple views?
-* ?passport?
+//* add sharing interface on profile--button done--wire in route tested in other app.
+//* ?possible to pull out some controller display functions/language esp that are common between multiple views? -?stl
+
+//* maybe also check for gmail oauth 2 and set up other use case for those users.  (this is a bit tricky, forego for now)
+
+* possibly stats/pie chart with total votes for each created poll on profile--could put in same canvas--onload--then destroy for detail of each view.  link to get back? -e/m
+* add responsive # of options on create -e
+* datastore improvement to possibly eliminate data functions and change mongoose query to return only relevant fields. -e
+* ?passport? -h
 
 
 

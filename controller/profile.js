@@ -1,84 +1,7 @@
 
 $(function() {
-  
-  var created_by;
-  var chart;
- 
-  function getDisplay(pollid){
-    $.get('/polls/display/'+pollid, function(data){
-        //important! destroy old chart or get weird hover behavior
-      //!Chart is defined elsewhere, don't worry about it
-        //also important: have to set options to begin at zero or chart begins with lowest value in data array
-        if (chart) chart.destroy();  
-        var ctx = document.getElementById('myChart').getContext('2d');
-        chart = new Chart(ctx, {
-            type: 'bar',
-            data: { labels:data.labels,
-            datasets: [{label: data.poll_name,
-              backgroundColor:['rgba(255, 99, 132, 0.5)',
-                'rgba(54, 162, 235, 0.5)',
-                'rgba(255, 206, 86, 0.5)',
-                'rgba(75, 192, 192, 0.5)',
-                'rgba(153, 102, 255, 0.5)',
-                'rgba(255, 159, 64, 0.5)'],
-                   data: data.votes,
-                  }]
-            },
-           options: {
-              scales: {
-                //xaxis ticks rotated because some labels are long and throwing off the display
-                //at some point could fix the incoming labels to line break https://stackoverflow.com/questions/21409717/chart-js-and-long-labels
-                xAxes: [{
-                  ticks: {
-                    minRotation:75,
-                    maxRotation:90
-                  }
-                }],
-                  yAxes: [{
-                      ticks: {
-                          beginAtZero:true,
-                        maxTicksLimit: Math.min(11, 1 + Math.max.apply(null, data)),
-                        //stepSize: 1
-                        //this puts marker line on y axis for each whole number
-                      }
-                  }]
-              }
-          }
-        });
-        
-      });      
-  }
-  
-  function getVotedOptions(){       
-    $.get('/voted/', function(votes){
-      
-              var opsArray=[];
-              var $options=$('.option'); 
-             console.log($options);
-                $options.each(function(index){
-                  opsArray.push( index + ": " + $options[index].innerText );
-                });  
-                 console.log(opsArray);
-      
-              votes.forEach(function(vote){                
-                var votedOption=vote.option;
-                for (var u=0; u<opsArray.length; u++){
-                  if (opsArray[u].indexOf(votedOption)!=-1){ 
-                    $options.each(function(index){
-                      if (index==u){                        
-                        if (($(this).parent().text()).indexOf('you voted for...')==-1){
-                          $(this).parent().prepend("you voted for... ");
-                        }                                           
-                        $(this).parent().addClass('userVote');
-                        //$(this).parent().siblings().addClass('unclickable');
-                        $('.selectedPoll').addClass('unclickable');
-                      }
-                    })
-                  }                  
-                }
-              })
-            })
-  }
+  //wrap the page in listdisplay to acquire the display functions for use 
+$.getScript( 'listdisplay.js', function() { 
   
   $.get('/authroute', function(user){
      
@@ -89,21 +12,21 @@ $(function() {
       })
          $('.bar').click(function(){
            $('.sharedelete').remove();
-           
+      $('.selectedPoll').removeClass('unclickable');    
       $('.selectedPoll').removeClass('selectedPoll');
+           
       $('#results').remove();
       $(this).addClass('selectedPoll');
       $('.selectedPoll').addClass('unclickable');
       $('<container id="results"></container>').appendTo(this);
       var id=$(this).find('.hidden').text(); 
-      getDisplay(id);
-      $('<span class="right sharedelete"><a href="#" id="share">Share</a><a href="#" id="delete">Delete</a></span>').prependTo('.selectedPoll')
-      $.get('/polls/select/'+id, function(opts){                
-        opts.forEach(function(opt){          
-          var o=opt.option+'<span class="hidden option">'+opt._id+'</span>';
-          $('<div class="barSub" ></div>').html(o).appendTo('#results');
-        });
-        getVotedOptions(); 
+       getPageOptions(id);    
+       $.getScript( 'chartdisplay.js', function() {  
+        getDisplay(id);  
+      })
+         
+      
+      $('<div id="shareFormSpot"><span class="right sharedelete"><a href="#" id="share">Share</a><a href="#" id="delete">Delete</a></span></div>').prependTo('#pollscreated .selectedPoll')
         
         //add clickable to child link elements to override selected poll behavior for the links
         $('#delete, #share').addClass('clickable');        
@@ -111,53 +34,53 @@ $(function() {
           $.get('/delete/'+id, function(ret){            
             if (ret=="OK"){
                 window.location.href=('/profile');
-              };
+              } else {
+                window.location.href=('/error?msg=4');
+              }
           });
         });
-        $('#share').on('click', function(){          
-          $.get('/share/'+id, function(ret){            
-            if (ret=="OK"){
-                window.location.href=('/detail/?id='+id);
-              };
-          });
+        $('#share').on('click', function(){ 
+          $('#shareFormSpot').html('<form><label>enter your email</label><input id="sender"></input><label>enter recipients email</label><input id="send_to"></input><button id="email">Email Now</button></form>')
+          $('#sender').focus();
+          $('#sender, #send_to, #email').addClass('clickable'); 
+          $('#email').click(function(event){
+      
+            event.preventDefault();
+            var sender_address = $('#sender').val();
+            var recipient_address = $('#send_to').val();  
+            $.post('/share/'+id +'?'+ $.param({sender: sender_address, recipient: recipient_address}), function(ret){            
+              if (ret=="OK"){
+                  alert("Nodemailer Set up and ready to plug in to a SMTP server.  Site will now redirect you to the detail page whose url would be set as a link to your recipient")
+                  window.location.href=('/detail/?id='+id);
+                } else {
+                  window.location.href=('/error?msg=2')
+                }
+            });
+          });    
         });
-        //need to add share here
+           //share click function ends here
+        
       });         
           
     });
- 
+    //end of get/created
+  });
+  //end of auth 
     
-    })
-    
+     
     
    $.get('/voted/', function(votes){        
       votes.forEach(function(vote){         
         var q=vote.pollname+'<span class="hidden">'+vote.poll_id+'</span>'; 
         $('<div class="bar vot"></div>').html(q).appendTo('#pollsVoted');  
       })
-
-    
-         $('.vot').click(function(){
-      $('.selectedPoll').removeClass('selectedPoll');
-      $('#results').remove();
-      $(this).addClass('selectedPoll');
-      $('<container id="results"></container>').appendTo(this);
-      var poll_id=$(this).find('.hidden').text(); 
-      getDisplay(poll_id);
-      $.get('/polls/select/'+poll_id, function(options){                
-        options.forEach(function(option){          
-          var o=option.option+'<span class="hidden option">'+option._id+'</span>';
-          $('<div class="barSub" ></div>').html(o).appendTo('#results');
-        }); 
-      }); 
-      getVotedOptions();
     });
+    //end of get voted
+  
    })
-    //end /voted/
+  //end of the external script
      
    
     })
-     
 
-})
 

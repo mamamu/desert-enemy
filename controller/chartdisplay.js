@@ -1,18 +1,7 @@
+//global chart var to help with weird chart hover problem
+var chart; 
 
-$(function() {
-  $.getScript( 'listdisplay.js', function() {
-  let param = (new URL(location)).searchParams;   
-  if (param == "") {
-    $('#pollcreator').html("there doesn't seem to be a record here--sorry!");
-  } else {
- var poll_id = param.get('id');
-  }
-  var optArr=[];
-  var created_by;
-  var chart;
-  
- 
-  function getDisplay(pollid){
+function getDisplay(pollid){
     $.get('/polls/display/'+pollid, function(data){
         //important! destroy old chart or get weird hover behavior
       //!Chart is defined elsewhere, don't worry about it
@@ -53,18 +42,6 @@ $(function() {
               }
           }
         });
-      $('h1').html(data.poll_name);       
-      $('<div class="bar selectedpoll"></div>').html(data.poll_name).appendTo('#pollspot'); 
-      $('<container id="results"></container>').appendTo('.bar');
-       
-        getPageOptions(pollid);  
-      });
+        
+      });      
   }
-  //display/chart function for this page is a slight variation and can't be substituted with the general one 
- //call the display function---display function will call the page options which will call the votedOptions
-  //if these don't get called/load in the right order certain dom elements aren't there for things to be added to the display
-  getDisplay(poll_id);
-    
-  })
-})
-  

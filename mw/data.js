@@ -48,7 +48,7 @@ module.exports={
         }
     })
   },
-pollToBeDeletedWasCreatedByUser: function(req, res, next){
+pollReferencedWasCreatedByUser: function(req, res, next){
   var poll=req.params.id;
   var userId=req.user._id;
   Poll.findOne({_id:poll, user:userId}, function (err, record){
@@ -56,8 +56,7 @@ pollToBeDeletedWasCreatedByUser: function(req, res, next){
       console.error(err);
       res.redirect('/');
     }
-    else {
-    console.log(record);
+    else {    
     next();
     }
   })
