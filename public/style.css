@@ -93,6 +93,12 @@ p {
  display: none;  
 }
 
+.invisible {
+  visibility: hidden;
+}
+
+
+
 .right {
   float: right;  
   /*width: 45%;*/
@@ -105,7 +111,13 @@ p {
 }
 
 canvas {
-  position: fixed;  
+  /*position: fixed;  */
+}
+
+
+
+.fixed {
+  position: fixed;
 }
 
 .barSub {

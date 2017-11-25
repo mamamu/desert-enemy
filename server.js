@@ -159,10 +159,10 @@ app.get("/delete/:id", auth.requireLogin, data.pollReferencedWasCreatedByUser, f
   datastore.deletePoll(req, res, Poll);
 })
 
-app.post("/share/:id", auth.requireLogin, data.pollReferencedWasCreatedByUser, function(req, res) {    
+app.post("/share/:id", auth.requireLogin, data.pollReferencedWasCreatedByUser, function(req, res) { 
   var sender=req.query.sender;
   var recipient=req.query.recipient;
-  var pollLink="https://desert-enemy.glitch.me/detail/?id="+req.params.id;    
+  var pollLink="https://desert-enemy.glitch.me/detail?id="+req.params.id;    
   mail.sendMessage(sender, recipient, pollLink);
   res.send("OK");
 })
@@ -173,32 +173,40 @@ app.get("/created/", auth.requireLogin, function(req, res){
   datastore.getAll(req, res, Poll, {user:id}, null, ["_id","poll_name"]);
 })
 
-//gets the ids of the options for the logged in user to change page display for both the profile and main index page
+//gets the voted options for the logged in user to populate voted section of profile page page
 app.get("/voted/", auth.requireLogin, function(req, res){   
   var id=req.user._id;
   datastore.userVotedFor(req, res, id, Vote);
 })
 
-//get list of polls from the database and push to poll array for display on page /currently limited to 20 most recent
+//get list of polls from the database and push to poll array for display on page (10 per page, page var will be multiples of 10, 0, 10, 20 etc.)
 app.get("/polls/?:page", function (req, res) {   
   var page=parseInt(req.params.page);  
-  datastore.getAll(req, res, Poll, {}, page, ["_id", "poll_name"]);
+  datastore.getAll(req, res, Poll, {}, page, ["_id", "poll_name"], Vote);
 });
 
 //get everything in the right order and format to pass to chartjs for the display.
 app.get("/polls/display/:id", function (request, response){  
   var id=request.params.id;
-  datastore.getForDisplay(request, response, Poll_Option, {in_poll:id}, ["option", "_id"], Vote);
+  datastore.getForDisplay(request, response, Poll_Option, {in_poll:id}, ["option", "_id", "in_poll"], Vote);
 });
 
 //this one assembles the clickable voting list for the individual polloptions in the display
-app.get("/polls/select/:id", function (req, res){  
-  //if more than 20 options in a poll, we have to figure out how to paginate options.  currently just set to null.
+app.get("/polls/select/:id", function (req, res){    
   var page=null;
-  var id=req.params.id;   
-  datastore.getAll(req, res, Poll_Option, {in_poll:id}, page,["_id", "option"]); 
+  var id=req.params.id; 
+  if (!req.user){
+    datastore.getAll(req, res, Poll_Option, {in_poll:id}, page ,["_id", "option"], Vote); 
+  } else {
+    datastore.getAllWithUserVotes(req, res, Poll_Option, {in_poll:id}, page ,["_id", "option"], Vote); 
+  }
+  
 });
 
+app.get("/display/userpie", auth.requireLogin, function (req, res){
+  var userid=req.user._id;  
+  datastore.userCreated(req, res, userid, ["poll_name", "_id"], Poll, Vote);
+})
 
 //to allow for anon users to vote --first requireUser function checks for user and if none creates a anon/ip user in database
 //checkip then gets the database userid for the ip user saved into req.userByIP, 

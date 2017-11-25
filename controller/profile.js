@@ -1,8 +1,14 @@
 
 $(function() {
+  
   //wrap the page in listdisplay to acquire the display functions for use 
 $.getScript( 'listdisplay.js', function() { 
-  
+  $.getScript( 'chartdisplay.js', function() { 
+    $('canvas').removeClass('fixed');
+        getPie();  
+      }) 
+  //share var created over in listdispaly, ignore
+  share=false;
   $.get('/authroute', function(user){
      
   $.get('/created/', function(items){          
@@ -11,6 +17,7 @@ $.getScript( 'listdisplay.js', function() {
       $('<div class="bar"></div>').html(p).appendTo('#pollsCreated');  
       })
          $('.bar').click(function(){
+           $('canvas').addClass('fixed');
            $('.sharedelete').remove();
       $('.selectedPoll').removeClass('unclickable');    
       $('.selectedPoll').removeClass('selectedPoll');
@@ -40,8 +47,11 @@ $.getScript( 'listdisplay.js', function() {
           });
         });
         $('#share').on('click', function(){ 
+          share=true;
           $('#shareFormSpot').html('<form><label>enter your email</label><input id="sender"></input><label>enter recipients email</label><input id="send_to"></input><button id="email">Email Now</button></form>')
+          $('.selectedPoll').addClass('unclickable');
           $('#sender').focus();
+          $('#sender, #send_to, #email').removeClass('selectedPoll')
           $('#sender, #send_to, #email').addClass('clickable'); 
           $('#email').click(function(event){
       
@@ -51,7 +61,7 @@ $.getScript( 'listdisplay.js', function() {
             $.post('/share/'+id +'?'+ $.param({sender: sender_address, recipient: recipient_address}), function(ret){            
               if (ret=="OK"){
                   alert("Nodemailer Set up and ready to plug in to a SMTP server.  Site will now redirect you to the detail page whose url would be set as a link to your recipient")
-                  window.location.href=('/detail/?id='+id);
+                  window.location.href=('/detail?id='+id);
                 } else {
                   window.location.href=('/error?msg=2')
                 }
@@ -68,10 +78,10 @@ $.getScript( 'listdisplay.js', function() {
   //end of auth 
     
      
-    
+   //click not working to open 
    $.get('/voted/', function(votes){        
-      votes.forEach(function(vote){         
-        var q=vote.pollname+'<span class="hidden">'+vote.poll_id+'</span>'; 
+      votes.forEach(function(vote){          
+        var q=vote.poll.poll_name+'<span class="hidden">'+vote.poll._id+'</span>'; 
         $('<div class="bar vot"></div>').html(q).appendTo('#pollsVoted');  
       })
     });

@@ -5,7 +5,6 @@ const nodemailer = require('nodemailer');
     var encodedLink=encodeURI(poll);    
 
 // Generate test SMTP service account from ethereal.email
-// Only needed if you don't have a real mail account for testing
 nodemailer.createTestAccount((err, account) => {
 
     // create reusable transporter object using the default SMTP transport
@@ -22,7 +21,7 @@ nodemailer.createTestAccount((err, account) => {
     // setup email data with unicode symbols
     let mailOptions = {
         from: sender, // sender address
-        to: recipient, // list of receivers
+        to: recipient, // recipient address comma sep list also works
         subject: 'Check out my poll!', // Subject line
         text: 'Copy and paste this link to see my poll '+poll+' .', // plain text body
         html: '<b><a href=' + encodedLink + '>click here to see my poll</a></b>' // html body
@@ -37,8 +36,7 @@ nodemailer.createTestAccount((err, account) => {
         // Preview only available when sending through an Ethereal account
         console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
 
-        // Message sent: <[email protected]>
-        // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+       
     });
 });
 }

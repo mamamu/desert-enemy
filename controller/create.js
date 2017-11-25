@@ -12,15 +12,29 @@ $(function() {
       new_poll_id=poll._id
     }); 
    });
- 
+  
+  function addInputIfNeeded(){
+  $('.final').on('focusin', function(){
+    $('#inputlist').append('<input type="text" class="option final" maxlength="100" placeholder="Add an Option">')
+    addInputIfNeeded();
+  })
+  }
+  
+  addInputIfNeeded();
   //for each option on the page, get the value, then submit with the _id obtained above
    $('#options').submit(function(event) {       
         event.preventDefault();     
       $(".option").each(function() {
         var option=$(this).val();        
-        $.post('/create/id/' + new_poll_id +"/"+option, function(){
+        $.post('/create/id/' + new_poll_id +"/"+option, function(ret){
+          if (ret=="OK"){
+            window.location.href=('/detail?id='+new_poll_id);
+          } else {
+            window.location.href=('/errorpage?msg=0');
+          }
        }); 
     });
+     
     //when you're done get rid of the stuff on the page to bring it back to normal 
    $('h2').empty();
    $('input').val('');
@@ -29,8 +43,5 @@ $(function() {
      $('input').focus();
    });
  
-
-     
-  
 
 });

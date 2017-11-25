@@ -33,10 +33,12 @@ todos (only bullet point items still waiting for completion)
 
 //* maybe also check for gmail oauth 2 and set up other use case for those users.  (this is a bit tricky, forego for now)
 
-* possibly stats/pie chart with total votes for each created poll on profile--could put in same canvas--onload--then destroy for detail of each view.  link to get back? -e/m
-* add responsive # of options on create -e
+//possibly stats/pie chart with total votes for each created poll on profile--could put in same canvas--onload--then destroy for detail of each view.  link to get back?--can just refresh page.. -e/m
+//* add responsive # of options on create -e
+
 * datastore improvement to possibly eliminate data functions and change mongoose query to return only relevant fields. -e
 * ?passport? -h
+* responsive design issue-chart at end of list.  Push/pull and/or flex-first not working for putting chart at beginning when on small display (window resized to phone dimensions) but also on right on med to large display
 
 
 
