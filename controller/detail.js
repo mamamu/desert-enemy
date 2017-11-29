@@ -11,7 +11,7 @@ $(function() {
   var created_by;
   var chart;
   
- 
+ //see the note where this function is called to understand why this appears to be duplicated here (it's not).
   function getDisplay(pollid){
     $.get('/polls/display/'+pollid, function(data){
         //important! destroy old chart or get weird hover behavior
@@ -46,7 +46,7 @@ $(function() {
                       ticks: {
                           beginAtZero:true,
                         maxTicksLimit: Math.min(11, 1 + Math.max.apply(null, data)),
-                        //stepSize: 1
+                        stepSize: 1
                         //this puts marker line on y axis for each whole number
                       }
                   }]
@@ -61,6 +61,7 @@ $(function() {
       });
   }
   //display/chart function for this page is a slight variation and can't be substituted with the general one 
+    //due to some alternate options and some fiddly bits on how the dom is assembled on this page vs others.
  //call the display function---display function will call the page options which will call the votedOptions
   //if these don't get called/load in the right order certain dom elements aren't there for things to be added to the display
   getDisplay(poll_id);

@@ -40,7 +40,7 @@ module.exports = {
                                   user:req.user._id});
     currentOption.save(function(err) {   
       if (err) console.error(err);
-      //console.log("save"); 
+       
       });       
   res.sendStatus(200);   
   },

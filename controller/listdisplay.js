@@ -52,7 +52,7 @@ function addAnotherOption(id){
         
    //click to vote         
           $('.barSub').on('click', function(){  
-            alert("hi");
+            
             $(this).addClass('selectedOption');            
             var opt_id=$(this).find('.hidden').text();             
             $.post('https://desert-enemy.glitch.me/polls/vote/'+poll_id+'/'+opt_id, function(ret){                

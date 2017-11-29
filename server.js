@@ -23,7 +23,7 @@ passport.use(new GoogleStrategy({
           'https://www.googleapis.com/auth/userinfo.email']
 },
 function(token, tokenSecret, profile, cb) {   
-  //console.log(profile.emails[0].value);
+  //if you wanted to store email in db its in profile at (profile.emails[0].value);
   process.nextTick(function () {
     User.findOne({ 'profile_id': profile.id }, function(err, user){
       if (err){
@@ -55,7 +55,7 @@ passport.use(new GithubStrategy({
   callbackURL: 'https://'+process.env.PROJECT_DOMAIN+'.glitch.me/login/github/return',  
 },
 function(token, tokenSecret, profile, cb) { 
-  //console.log(profile._json.email)
+  //if you wanted to store email in db its in profile (if user made avail) at (profile._json.email)
   process.nextTick(function () {
     User.findOne({ 'profile_id': profile.id }, function(err, user){
       if (err){
@@ -105,7 +105,7 @@ app.use(express.static('controller'));
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
-app.use(expressSession({ secret:'watchfobfairies', resave: true, saveUninitialized: true, maxAge: (90 * 24 * 3600000) }));
+app.use(expressSession({ secret: process.env.SESSION_SECRET, resave: true, saveUninitialized: true, maxAge: (90 * 24 * 3600000) }));
 app.use(passport.initialize());
 app.use(passport.session());
 

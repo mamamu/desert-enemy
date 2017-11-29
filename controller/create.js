@@ -34,13 +34,7 @@ $(function() {
           }
        }); 
     });
-     
-    //when you're done get rid of the stuff on the page to bring it back to normal 
-   $('h2').empty();
-   $('input').val('');
-   $('#pollname').toggleClass('hidden');
-   $('#options').toggleClass('hidden'); 
-     $('input').focus();
+
    });
  
 

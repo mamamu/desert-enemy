@@ -17,8 +17,10 @@ $.getScript( 'listdisplay.js', function() {
       $('<div class="bar"></div>').html(p).appendTo('#pollsCreated');  
       })
          $('.bar').click(function(){
-           $('canvas').addClass('fixed');
+           $('canvas').addClass('fixed');           
            $('.sharedelete').remove();
+           
+           
       $('.selectedPoll').removeClass('unclickable');    
       $('.selectedPoll').removeClass('selectedPoll');
            
@@ -33,7 +35,7 @@ $.getScript( 'listdisplay.js', function() {
       })
          
       
-      $('<div id="shareFormSpot"><span class="right sharedelete"><a href="#" id="share">Share</a><a href="#" id="delete">Delete</a></span></div>').prependTo('#pollscreated .selectedPoll')
+      $('<div id="shareFormSpot"><span class="right sharedelete"><a href="#" id="share">Share</a><a href="#" id="delete">Delete</a></span><div id="shareForm"></div></div>').prependTo(this)
         
         //add clickable to child link elements to override selected poll behavior for the links
         $('#delete, #share').addClass('clickable');        
@@ -47,12 +49,13 @@ $.getScript( 'listdisplay.js', function() {
           });
         });
         $('#share').on('click', function(){ 
-          share=true;
-          $('#shareFormSpot').html('<form><label>enter your email</label><input id="sender"></input><label>enter recipients email</label><input id="send_to"></input><button id="email">Email Now</button></form>')
+          share=true;          
+          $('#shareForm').html('<form><label>enter your email</label><input id="sender"></input><label>enter recipients email</label><input id="send_to"></input><button id="email">Share Via Email</button><a id="sharecancel" href="#">Cancel</a></form>')
           $('.selectedPoll').addClass('unclickable');
+          $('.bar').addClass('unclickable');          
           $('#sender').focus();
           $('#sender, #send_to, #email').removeClass('selectedPoll')
-          $('#sender, #send_to, #email').addClass('clickable'); 
+          $('#sender, #send_to, #email, #sharecancel').addClass('clickable'); 
           $('#email').click(function(event){
       
             event.preventDefault();
@@ -60,13 +63,19 @@ $.getScript( 'listdisplay.js', function() {
             var recipient_address = $('#send_to').val();  
             $.post('/share/'+id +'?'+ $.param({sender: sender_address, recipient: recipient_address}), function(ret){            
               if (ret=="OK"){
-                  alert("Nodemailer Set up and ready to plug in to a SMTP server.  Site will now redirect you to the detail page whose url would be set as a link to your recipient")
+                  alert("Nodemailer Set up and ready to plug in to a SMTP server.  Site will now redirect you to the detail page whose url would be sent as a link to your recipient")
                   window.location.href=('/detail?id='+id);
                 } else {
                   window.location.href=('/error?msg=2')
                 }
             });
-          });    
+          }); 
+          $('#sharecancel').on('click', function(){
+            //quick and dirty since I just realized I need a way to cancel out of the share form and theres a bit of heinous jquery that happens
+            //unless you reload the page here
+            window.location.href=('/profile');          
+            
+          })
         });
            //share click function ends here
         

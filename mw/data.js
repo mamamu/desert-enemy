@@ -32,7 +32,7 @@ pollReferencedWasCreatedByUser: function(req, res, next){
   Poll.findOne({_id:poll, user:userId}, function (err, record){
     if (err) {
       console.error(err);
-      res.redirect('/');
+      res.redirect('/errorpage?msg=5');
     }
     else {    
     next();

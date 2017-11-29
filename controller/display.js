@@ -4,8 +4,7 @@ $(function() {
   $.getScript( 'listdisplay.js', function() {
   
   refreshPolls();  
-    //add canvas scrolling behavior--fixed for regular charts, scrolling for pie chart on profile page.
-  $('canvas').addClass('fixed');
+   
 //nearly everything is wrapped in the refresh Polls function which is called on ready so that when you do one of the actions below 
   //i.e. vote, the whole dom is updated to reflect it.  this is handled differently on the profile page, and so that one doesn't have same structure
   //even though it's doing many similar things
